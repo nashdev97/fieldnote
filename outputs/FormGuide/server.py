@@ -2,6 +2,7 @@ import asyncio
 import base64
 import binascii
 import json
+import logging
 import os
 import re
 import time
@@ -38,6 +39,7 @@ _global_daily: dict[str, int] = defaultdict(int)
 _quota_lock = asyncio.Lock()
 _generation_slots = asyncio.Semaphore(3)
 _model_client: Optional[AsyncAnthropic] = None
+logger = logging.getLogger(__name__)
 
 
 @app.middleware("http")
@@ -197,6 +199,11 @@ async def explain(payload: ExplainRequest, request: Request):
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=502, detail="The model returned an unclear result. Try a sharper photo or shorter excerpt.") from exc
     except Exception as exc:
+        logger.error(
+            "Tinker inference failed (error_type=%s, status_code=%s)",
+            type(exc).__name__,
+            getattr(exc, "status_code", None),
+        )
         raise HTTPException(status_code=502, detail="The hosted model could not explain this form right now. Please try again.") from exc
 
 
