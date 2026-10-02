@@ -1,6 +1,7 @@
 services:
   - type: web
     name: fieldnote
+    plan: free
     runtime: python
     rootDir: outputs/FormGuide
     buildCommand: pip install -r requirements.txt
